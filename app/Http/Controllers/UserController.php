@@ -19,8 +19,9 @@ class UserController
 {
     public function resetPassword(string $id): JsonResponse
     {
-        return response()->json(['password' =>UserService::resetPassword($id)]);
+        return response()->json(['password' => UserService::resetPassword($id)]);
     }
+
     public function login(UserAuthRequest $request): JsonResponse
     {
         $user = UserService::getUserByEmail($request->get('email'));

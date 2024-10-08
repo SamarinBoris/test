@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Validator;
 
 class UserAuthRequest extends FormRequest
 {
@@ -24,6 +26,21 @@ class UserAuthRequest extends FormRequest
         return [
             'email' => 'required|email',
             'password' => 'required'
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $data = $validator->validated();
+                if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
+                    $validator->errors()->add(
+                        'Email',
+                        'Email и пароль не заполнены корректно'
+                    );
+                }
+            }
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Models\User;
 use App\Service\Dto\UserCreateDto;
 use App\Service\Dto\UserUpdateDto;
+use App\Service\Interfaces\UserServiceInterface;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     public static function resetPassword(string $id): string
     {
@@ -181,5 +182,10 @@ class UserService
         }
         DB::commit();
         return $users;
+    }
+
+    public static function getUserByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
     }
 }

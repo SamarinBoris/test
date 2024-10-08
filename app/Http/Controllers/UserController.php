@@ -23,27 +23,17 @@ class UserController
     }
     public function login(UserAuthRequest $request): JsonResponse
     {
-        try {
-            if(!Auth::attempt($request->only(['email', 'password']))){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Email и пароль не заполнены корректно',
-                ], 401);
-            }
-
-            $user = User::where('email', $request->email)->first();
-
+        $user = UserService::getUserByEmail($request->get('email'));
+        if (empty($user)) {
             return response()->json([
-                'status' => true,
-                'token' => $user->createToken("UserApiToken")->plainTextToken
-            ], 200);
-
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+                'Пользователь не найден'
+            ], 404);
         }
+
+        return response()->json([
+            'status' => true,
+            'token' => $user->createToken("UserApiToken")->plainTextToken
+        ], 200);
     }
 
     public function getList(): Collection

@@ -5,93 +5,133 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserAuthRequest;
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Responses\ApiSuccessResponse;
 use App\Models\User;
 use App\Service\Dto\UserCreateDto;
 use App\Service\Dto\UserUpdateDto;
 use App\Service\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Whoops\Handler\JsonResponseHandler;
 
-class UserController
+class UserController extends Controller
 {
-    public function resetPassword(string $id): JsonResponse
+    public function resetPassword(string $id): ApiSuccessResponse
     {
-        return response()->json(['password' => UserService::resetPassword($id)]);
+        return new ApiSuccessResponse(['password' => UserService::resetPassword($id)]);
     }
 
-    public function login(UserAuthRequest $request): JsonResponse
+    public function login(UserAuthRequest $request): ApiSuccessResponse
     {
         $user = UserService::getUserByEmail($request->get('email'));
         if (empty($user)) {
-            return response()->json([
+            return new ApiSuccessResponse([
                 'Пользователь не найден'
             ], 404);
         }
 
-        return response()->json([
-            'status' => true,
-            'token' => $user->createToken("UserApiToken")->plainTextToken
-        ], 200);
+        return new ApiSuccessResponse(
+            [
+                'status' => true,
+                'token' => $user->createToken("UserApiToken")->plainTextToken
+            ]
+        );
     }
 
-    public function getList(Request $request): Collection
+    public function getList(Request $request): ApiSuccessResponse
     {
-        return UserService::getList($request->all());
+        return new ApiSuccessResponse(
+            UserService::getList($request->all())
+        );
     }
 
-    public function getById(string $id): User
+    public function getById(string $id): ApiSuccessResponse
     {
-        return UserService::getById($id);
+        return new ApiSuccessResponse(
+            UserService::getById($id)
+        );
     }
 
-    public function getDeletedList(): Collection
+    public function getDeletedList(): ApiSuccessResponse
     {
-        return UserService::getDeletedList();
+        UserService::getDeletedList();
+        return new ApiSuccessResponse(
+            'Пользователи удалены'
+        );
     }
 
-    public function delete(string $id): void
+    public function delete(string $id): ApiSuccessResponse
     {
         UserService::delete($id);
+        return new ApiSuccessResponse(
+            'Пользователь удален'
+        );
     }
 
-    public function deleteForever(string $id): void
+    public function deleteForever(string $id): ApiSuccessResponse
     {
         UserService::deleteDb($id);
+        return new ApiSuccessResponse(
+            'Пользователь удален'
+        );
     }
 
-    public function deleteByIds(array $ids): void
+    /**
+     * @throws \Throwable
+     */
+    public function deleteByIds(array $ids): ApiSuccessResponse
     {
         UserService::deleteByIds($ids);
+        return new ApiSuccessResponse(
+            'Пользователи удалены'
+        );
     }
 
-    public function deleteForeverByIds(array $ids): void
+    public function deleteForeverByIds(array $ids): ApiSuccessResponse
     {
         UserService::deleteByIdsDb($ids);
+        return new ApiSuccessResponse(
+            'Пользователи удалены'
+        );
     }
 
-    public function rollbackById(string $id): JsonResponse
+    public function rollbackById(string $id): ApiSuccessResponse
     {
-        return response()->json(UserService::rollbackById($id));
+        return new ApiSuccessResponse(
+            UserService::rollbackById($id)
+        );
     }
 
-    public function rollbackByIds(array $ids): JsonResponse
+    /**
+     * @throws \Throwable
+     */
+    public function rollbackByIds(array $ids): ApiSuccessResponse
     {
-        return response()->json(UserService::rollbackByIds($ids));
+        return new ApiSuccessResponse(
+            UserService::rollbackByIds($ids)
+        );
     }
 
-    public function create(UserCreateRequest $request): JsonResponse
+    public function create(UserCreateRequest $request): ApiSuccessResponse
     {
         $dataUser = $request->only(['last_name', 'name', 'middle_name', 'email', 'phone', 'password']);
-        return response()->json(UserService::create(new UserCreateDto(... $dataUser)));
+        return new ApiSuccessResponse(
+            UserService::create(new UserCreateDto(... $dataUser)),
+            Response::HTTP_CREATED
+        );
+
     }
 
-    public function update(string $id, UserUpdateRequest $request): JsonResponse
+    public function update(string $id, UserUpdateRequest $request): ApiSuccessResponse
     {
         $dataUser = $request->only(['last_name', 'name', 'middle_name', 'email', 'phone', 'password']);
         $dataUser['id'] = $id;
-        return response()->json(UserService::update(new UserUpdateDto(... $dataUser)));
+        return new ApiSuccessResponse(
+            UserService::update(new UserUpdateDto(... $dataUser))
+        );
     }
 }

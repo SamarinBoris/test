@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Service\Dto\UserCreateDto;
 use App\Service\Dto\UserUpdateDto;
 use App\Service\Interfaces\UserServiceInterface;
+use App\Traits\QueryHelperTrait;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ use Throwable;
 
 class UserService implements UserServiceInterface
 {
+    use QueryHelperTrait;
     public static function resetPassword(string $id): string
     {
         $password = Str::password(8);
@@ -53,9 +55,14 @@ class UserService implements UserServiceInterface
     /**
      * @return Collection
      */
-    public static function getList(): Collection
+    public static function getList( array $filterData = []): Collection
     {
-        return User::all();
+        $query = User::query();
+        if(!empty($filterData)){
+            $query = self::filterQuery($query, $filterData);
+            $query = self::sortQuery($query, $filterData);
+        }
+        return $query->get();
     }
 
     /**

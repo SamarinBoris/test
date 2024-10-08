@@ -37,9 +37,9 @@ class UserController
         ], 200);
     }
 
-    public function getList(): Collection
+    public function getList(Request $request): Collection
     {
-        return UserService::getList();
+        return UserService::getList($request->all());
     }
 
     public function getById(string $id): User

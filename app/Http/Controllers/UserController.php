@@ -6,17 +6,12 @@ use App\Http\Requests\UserAuthRequest;
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Responses\ApiSuccessResponse;
-use App\Models\User;
 use App\Service\Dto\UserCreateDto;
 use App\Service\Dto\UserUpdateDto;
 use App\Service\UserService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Whoops\Handler\JsonResponseHandler;
 
 class UserController extends Controller
 {
